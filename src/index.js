@@ -22,6 +22,9 @@ export default async function register(app) {
     version: pkg.version,
     i18n,
     collections: {
+      Counters: {
+        name: "Counters",
+      },
       Orders: {
         name: "Orders",
         indexes: [
@@ -37,18 +40,18 @@ export default async function register(app) {
           [{ "payments.address.fullName": 1 }],
           [{ "shipping.address.fullName": 1 }],
           [{ "payments.address.phone": 1 }],
-          [{ "workflow.status": 1 }, { name: "c2_workflow.status" }]
-        ]
-      }
+          [{ "workflow.status": 1 }, { name: "c2_workflow.status" }],
+        ],
+      },
     },
     functionsByType: {
       getDataForOrderEmail: [getDataForOrderEmail],
       preStartup: [preStartup],
-      startup: [startup]
+      startup: [startup],
     },
     graphQL: {
       resolvers,
-      schemas
+      schemas,
     },
     mutations,
     queries,
@@ -56,7 +59,7 @@ export default async function register(app) {
     simpleSchemas: {
       Order,
       OrderFulfillmentGroup,
-      OrderItem
-    }
+      OrderItem,
+    },
   });
 }
