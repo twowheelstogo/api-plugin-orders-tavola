@@ -7,7 +7,71 @@ const withoutCodeCountries = ["AO", "AG", "AW", "BS", "BZ", "BJ", "BW",
   "MS", "NR", "AN", "NU", "KP", "PA", "QA", "RW", "KN", "LC",
   "ST", "SA", "SC", "SL", "SB", "SO", "SR", "SY", "TZ", "TL",
   "TK", "TO", "TT", "TV", "UG", "AE", "VU", "YE", "ZW"];
-
+/**
+ * @name Billing
+ * @memberof Schemas
+ * @type {SimpleSchema}
+ * @property {String} name optional
+ * @property {String} nit optional
+ * @property {String} address optional
+ * @property {Boolean} isCf optional
+ */
+export const BillingDetails = new SimpleSchema({
+  "name": {
+    type: String,
+    optional: true
+  },
+  "nit": {
+    type: String,
+    optional: true
+  },
+  "address": {
+    type: String,
+    optional: true
+  },
+  "isCf": {
+    type: Boolean,
+    optional: true
+  },
+  "partnerId": {
+    type: Number,
+    optional: true
+  },
+  "country": {
+    type: String,
+    optional: true
+  },
+  "depto": {
+    type: String,
+    optional: true
+  },
+  "city": {
+    type: String,
+    optional: true
+  }
+});
+/**
+ * @name Gift
+ * @memberof Schemas
+ * @type {SimpleSchema}
+ * @property {String} sender optional
+ * @property {String} receiver optional
+ * @property {String} message optional
+ */
+export const Gift = new SimpleSchema({
+  sender: {
+    type: String,
+    optional: true
+  },
+  receiver: {
+    type: String,
+    optional: true
+  },
+  message: {
+    type: String,
+    optional: true
+  }
+});
 /**
  * @name Metafield
  * @memberof Schemas
@@ -46,6 +110,23 @@ const Metafield = new SimpleSchema({
     type: String,
     optional: true
   }
+});
+const ImageSizes = new SimpleSchema({
+  "large": {
+    type: String
+  },
+  "medium": {
+    type: String
+  },
+  "original": {
+    type: String
+  },
+  "small": {
+    type: String
+  },
+  "thumbnail": {
+    type: String
+  },
 });
 
 /**
@@ -164,7 +245,77 @@ export const OrderAddress = new SimpleSchema({
     type: Metafield
   }
 });
+export const Geolocation = new SimpleSchema({
+  "latitude": {
+    type: Number
+  },
+  "longitude": {
+    type: Number
+  }
+ })
+ export const DistanceMeta = new SimpleSchema({
+  "value": {
+    type: Number
+  },
+  "text": {
+    type: String
+  }
+})
 
+export const Metaddress = new SimpleSchema({
+  "administrative_area_level_1":{
+    type: String,
+    optional: true
+  },
+  "administrative_area_level_2":{
+    type: String,
+    optional: true
+  },
+  "neighborhood":{
+    type: String,
+    optional: true
+  },
+  "street_address":{
+    type: String,
+    optional: true
+  },
+  "sublocality":{
+    type: String,
+    optional: true
+  },
+  "distance":{
+    type: DistanceMeta,
+    optional: true
+  }
+})
+ export const CustomOrderAddress = new SimpleSchema({
+  "_id": {
+    type: String,
+    optional: true
+  },
+  "description": {
+    type: String,
+    label: "Description"
+  },
+  "reference": {
+    type: String,
+    label: "Reference",
+    optional: true
+  },
+  "address": {
+    type: String,
+    label: "Address"
+  },
+  "geolocation":{
+    type:Geolocation,
+    label:"geolocation",
+    optional:true
+  },
+  "metaddress": {
+    type: Metaddress,
+    optional: true
+  }
+});
 /**
  * @name ShippingParcel
  * @memberof Schemas
@@ -318,7 +469,7 @@ export const CommonOrder = new SimpleSchema({
     optional: true
   },
   billingAddress: {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   cartId: {
@@ -341,11 +492,11 @@ export const CommonOrder = new SimpleSchema({
     optional: true
   },
   originAddress: {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   shippingAddress: {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   shopId: String,
@@ -362,6 +513,15 @@ export const CommonOrder = new SimpleSchema({
 export const orderItemInputSchema = new SimpleSchema({
   "addedAt": {
     type: Date,
+    optional: true
+  },
+  "metafields": {
+    type: Array,
+    optional: true
+  },
+  "metafields.$": {
+    type: Object,
+    blackbox: true,
     optional: true
   },
   "price": Number,
@@ -397,13 +557,38 @@ export const orderFulfillmentGroupInputSchema = new SimpleSchema({
   }
 });
 
+/**
+ * @name NotesInput
+ * @memberof Schemas
+ * @type {SimpleSchema}
+ * @property {String} content required
+ * @property {String} userId required
+ * @property {Date} updatedAt required
+ */
+ const NotesInput = new SimpleSchema({
+  content: {
+    type: String
+  },
+  userId: {
+    type: String,
+    optional: true
+  },
+  updatedAt: {
+    type: Date
+  },
+  createdAt: {
+    type: Date,
+    optional: true
+  }
+});
+
 // Exported for unit tests
 export const orderInputSchema = new SimpleSchema({
   // Although billing address is typically needed only by the payment plugin,
   // some tax services require it to calculate taxes for digital items. Thus
   // it should be provided here in order to be added to the CommonOrder if possible.
   "billingAddress": {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   "cartId": {
@@ -432,14 +617,31 @@ export const orderInputSchema = new SimpleSchema({
     type: String,
     optional: true
   },
-  "shopId": String
+  "shopId": String,
+  "billing": {
+    type: BillingDetails,
+    optional: true
+  },
+  "giftNote": {
+    type: Gift,
+    optional: true
+  },
+  "notes": {
+    type: Array,
+    optional: true
+  },
+  "notes.$": NotesInput,
+  "deliveryDate": {
+    type: Date,
+    optional: true
+  }
 });
 
 export const paymentInputSchema = new SimpleSchema({
   amount: Number,
   // Optionally override the order.billingAddress for each payment
   billingAddress: {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   data: {
@@ -599,6 +801,10 @@ const Notes = new SimpleSchema({
   },
   updatedAt: {
     type: Date
+  },
+  createdAt: {
+    type: Date,
+    optional: true
   }
 });
 
@@ -706,6 +912,10 @@ export const OrderItem = new SimpleSchema({
   "history.$": {
     type: History
   },
+  "imageURLs": {
+    type: ImageSizes,
+    optional: true
+  },
   "optionTitle": {
     type: String,
     optional: true
@@ -718,6 +928,14 @@ export const OrderItem = new SimpleSchema({
   "productId": String,
   "productSlug": {
     type: String,
+    optional: true
+  },
+  "odooProduct": {
+    type: Number,
+    optional: true
+  },
+  "categoryVariant": {
+    type: Number,
     optional: true
   },
   "productType": {
@@ -757,6 +975,15 @@ export const OrderItem = new SimpleSchema({
     type: Workflow,
     optional: true,
     defaultValue: {}
+  },
+  "metafields": {
+    type: Array,
+    optional: true
+  },
+  "metafields.$": {
+    type: Object,
+    blackbox: true,
+    optional: true
   }
 });
 
@@ -820,7 +1047,7 @@ const SelectedFulfillmentOption = new SimpleSchema({
 export const OrderFulfillmentGroup = new SimpleSchema({
   "_id": String,
   "address": {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   "customsLabelUrl": {
@@ -936,7 +1163,7 @@ export const Payment = new SimpleSchema({
     label: "Payment Id"
   },
   "address": {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   "amount": Number,
@@ -1012,6 +1239,9 @@ export const Payment = new SimpleSchema({
  * @property {OrderTransaction[]} transactions optional
  * @property {Date} updatedAt optional
  * @property {Workflow} workflow optional
+ * @property {BillingDetails} billing optional
+ * @property {GiftNote} giftNote optional
+ * @property {Number} idOdooBilling optional
  */
 export const Order = new SimpleSchema({
   "_id": {
@@ -1035,7 +1265,7 @@ export const Order = new SimpleSchema({
   // some tax services require it to calculate taxes for digital items. Thus
   // it should be provided here in order to be added to the CommonOrder if possible.
   "billingAddress": {
-    type: OrderAddress,
+    type: CustomOrderAddress,
     optional: true
   },
   "cartId": {
@@ -1118,6 +1348,33 @@ export const Order = new SimpleSchema({
     type: Workflow,
     optional: true,
     defaultValue: {}
+  },
+  "billing": {
+    type: BillingDetails,
+    optional: true,
+    defaultValue: {
+      nit: "C/F",
+      name: "C/F",
+      address: "C/F",
+      country: "Guatemala",
+      depto: "Guatemala",
+      city: "Guatemala",
+      isCf: true,
+      partnerId: -1
+    }
+  },
+  "giftNote": {
+    type: Gift,
+    optional: true
+  },
+  "idOdooBilling": {
+    type: Number,
+    optional: true,
+    defaultValue: 0
+  },
+  "deliveryDate": {
+    type: Date,
+    optional: true
   }
 });
 
